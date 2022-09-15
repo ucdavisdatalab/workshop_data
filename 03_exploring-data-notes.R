@@ -14,13 +14,28 @@
 # it.
 #
 # The indexing operator `[` almost always keeps the container:
+setwd("workshop_data")
+earn = read.csv( "earn.csv" )
 
+x = list(first=1:3, second=sin, third=c("hi", "hello"))
+x 
+names(x)
 
+x[3]
+class(x)
+class(x[3])
+
+third=c("hi", "hello")
 # The result is still a list.
 #
 # Unlike the indexing operator `[`, the extraction operator `[[` always
 # discards the container:
 
+x[[3]]
+x[3]
+
+class(x[3])
+class( x[[3]] )
 
 # The tradeoff: the extraction operator can only get or set one element at
 # a time.
@@ -29,14 +44,23 @@
 #
 # The extraction operator can only index by position or name:
 
+x[[1:2]]
 
 # The index operator `[` returns `NA` for invalid vector elements, and `NULL`
 # for invalid list elements:
-
+length(x)
+x[4]
 
 # The extraction operator `[[` raises an error for invalid elements:
+x[[4]]
+earn[[1]]
+head( earn[[ "age" ]] )
+head( earn$age )
 
-
+myvar = "age"
+head( earn[[ myvar ]] )
+head( earn$myvar )
+head( earn[ "age" ] )
 # In general:
 #
 # * Use the indexing operator `[` to index vectors
@@ -52,11 +76,33 @@
 #   DATA[ROWS, COLUMNS]
 # 
 # For instance:
+earn[ 1:3, ]
+earn[ 1:3, c(2, 4) ]
+1:3
 
+earn[ c(1,2,3), c(2,4) ]
+earn[ 1:3, myvar ]
 
 # Mixing different ways of indexing is allowed:
+index = earn$year == 2016
+typeof(index)
+index
 
+earn[ index, 1:3 ]
+head( earn[ index, ] )
 
+result = earn[ earn$sex == "Women", c("sex", "age", "n_persons") ]
+head( result )
+table( result$age ) 
+
+mod_earn = earn
+mod_earn$sex[ mod_earn$sex == "Both Sexes" ] = "all"
+head(mod_earn)
+
+mod_earn[ mod_earn$sex == "all", "sex" ] = "both"
+head(mod_earn)
+
+head( earn[ earn$median_weekly_earn > 800, ] )
 # For data frames, it's especially common to index rows by condition and
 # columns by name.
 #
@@ -68,6 +114,8 @@
 # If you use two-dimensional indexing with `[` to select exactly one column,
 # you get a vector:
 
+earn[index, "median_weekly_earn" ]
+earn[ index, "median_weekly_earn", drop=FALSE ]
 
 # The container is dropped, even though `[` usually keeps containers!
 #
@@ -100,7 +148,13 @@
 # 
 # For example, to install the `remotes` package:
 
+# install.packages("remotes")
+install_github()
+library( "remotes" )
+install_github()
 
+# install.packages( "ggplot2" )
+library( "ggplot2" )
 # R automatically installs any other packages the requested package depends on.
 #
 # You can tell that installation succeeded by the final line `DONE`.
@@ -118,6 +172,12 @@
 # You can use the `installed.packages` function to see which packages are
 # installed:
 
+pkgs = installed.packages()
+class(pkgs)
+colnames(pkgs)
+pkgs[ 1:10, "Version" ]
+
+sessionInfo()
 
 # Before you can use an installed package, you must load the package with the
 # `library` function.
@@ -198,16 +258,22 @@
 # 
 # Before plotting, take a subset of the earnings that only contains data for
 # 2019:
-
+earn19 = earn[ earn$year == 2019, ]
 
 # The data is also broken down across `race`, `ethnic_origin`, and `age`.
 #
 # We aren't interested in these categories, so need to further
 # subset the data:
-
+earn19 = subset( earn, year==2019 &
+                     race=="All Races" & 
+                     ethnic_origin=="All Origins" &
+                     age == "16 years and over" )
 
 # Now we're ready to make the plot.
-# 
+ggplot(earn19) +
+    aes(x=quarter, y=median_weekly_earn, linetype=sex) +
+    geom_line()
+
 # ### Layer 1: Data
 # 
 # The data layer determines the data set used to make the plot.
